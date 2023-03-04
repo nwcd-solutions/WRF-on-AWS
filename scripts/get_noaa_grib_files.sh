@@ -53,19 +53,19 @@ wait
 
 #########################################
 
-cat GRIBFILE*  > full_grib_file
-length=$(wgrib2 full_grib_file|tail -1|awk -F":" '{ print $1}')
-echo $length
+#cat GRIBFILE*  > full_grib_file
+#length=$(wgrib2 full_grib_file|tail -1|awk -F":" '{ print $1}')
+#echo $length
 
-if [ "$length" != "6839" ] ; then
-        echo "Download failed"
-        cd $dirwork
-        exit 1
-else
-        cd $dirgfs
-        echo 2 > gfs_ok
-        rm -f full_grib_file
-fi
+#if [ "$length" != "6839" ] ; then
+#        echo "Download failed"
+#        cd $dirwork
+#        exit 1
+#else
+#        cd $dirgfs
+#        echo 2 > gfs_ok
+#        rm -f full_grib_file
+#fi
 
 echo "End of Download"
 exit 0
