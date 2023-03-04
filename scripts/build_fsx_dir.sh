@@ -25,7 +25,7 @@ ln -s ${WPS_DIR}/ungrib.exe ungrib.exe
 ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS Vtable
 
 mkdir -p /fsx/FORECAST/download
-
+mkdir -p /fsx/bin
 cp -R ${SETUP_DIR}/scripts/fsx/* /fsx/bin
 chmod -R 775 /fsx/bin
 chmod -R 777 /fsx/FORECAST
