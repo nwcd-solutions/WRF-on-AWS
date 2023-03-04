@@ -3,7 +3,7 @@ source /shared/setup_env.sh
 FSX_DIR=/fsx/FORECAST/domains/test
 WPSWORK=${FSX_DIR}/preproc
 WRFWORK=${FSX_DIR}/run
-GEOG_DIR=${FSX_DIR}/../geog
+GEOG_DIR=${TARGET_DIR}/../geog
 
 cd /fsx/FORECAST/download
 
