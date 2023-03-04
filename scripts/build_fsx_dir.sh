@@ -17,7 +17,7 @@ ln -s  ${WRF_DIR}/phys/noahmp/parameters/MPTABLE.TBL MPTABLE.TBL
 #Copy WPS Files and links
 mkdir ${FSX_DIR}/preproc
 cd ${FSX_DIR}/preproc
-n -s ${WPS_DIR}/geogrid.exe geogrid.exe
+ln -s ${WPS_DIR}/geogrid.exe geogrid.exe
 ln -s ${WPS_DIR}/geogrid/GEOGRID.TBL GEOGRID.TBL
 ln -s ${WPS_DIR}/metgrid.exe metgrid.exe
 ln -s ${WPS_DIR}/metgrid/METGRID.TBL METGRID.TBL
