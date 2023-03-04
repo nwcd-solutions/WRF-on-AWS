@@ -6,6 +6,6 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=64
 #SBATCH --cpus-per-task=1
-
-cd /shared/FORECAST/domains/test/run
+module load openmpi
+cd /fsx/FORECAST/domains/test/run
 mpirun  ./wrf.exe
