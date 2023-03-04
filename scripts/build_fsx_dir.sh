@@ -5,7 +5,7 @@ FSX_DIR=/fsx/FORECAST/domains/test
 mkdir -p ${FSX_DIR}
 mkdir -p ${FSX_DIR}/log
 
-cp -a ${WRF_DIR}/run  ${TARGET_DIR}
+cp -a ${WRF_DIR}/run  ${FSX_DIR}
 cd  ${FSX_DIR}/run
 rm ndown.exe real.exe tc.exe wrf.exe MPTABLE.TBL 
 ln -s  ${WRF_DIR}/main/ndown.exe ndown.exe
