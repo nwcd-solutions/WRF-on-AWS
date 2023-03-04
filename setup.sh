@@ -17,7 +17,7 @@ fi
 
 
 export SHARED_DIR=${shared_folder}
-export SETUP_DIR=${shared_folder}/hpc-workshop-wrf
+export SETUP_DIR=${shared_folder}/wrf-on-aws
 export BUILDDIR=${shared_folder}/build/WRF
 export DIR=${shared_folder}/WRF
 export SCRIPTDIR=${shared_folder}/WRF/bin
@@ -53,7 +53,7 @@ case ${cfn_node_type} in
                 create_env_file
                 source ${shared_folder}/setup_env.sh
                 cd ${shared_folder}
-                bash ${shared_folder}/hpc-workshop-wrf/pc_setup_scripts/pcluster_install_spack.sh
+                bash ${shared_folder}/wrf-on-aws/pc_setup_scripts/pcluster_install_spack.sh
                 
         ;;
         ComputeFleet)
