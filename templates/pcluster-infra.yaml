@@ -323,40 +323,6 @@ Resources:
           SourceSecurityGroupId: !Ref PublicSubnetSecurityGroup
       VpcId: !Ref VPC
 
-  EFASubnetSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: "efa-subnet-sg"
-      GroupDescription: "EFA Subnet Security Group"
-      SecurityGroupIngress:
-        - IpProtocol: -1
-          SourceSecurityGroupId: !Ref PublicSubnetSecurityGroup
-      VpcId: !Ref VPC
-
-  EFASecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      Description: "EFA Subnet Security Group Ingress Rule"
-      GroupId: !Ref EFASubnetSecurityGroup
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref EFASubnetSecurityGroup
-
-  EFASecurityGroupDefaultEgress:
-    Type: AWS::EC2::SecurityGroupEgress
-    Properties:
-      Description: "EFA Subnet Default Security Group Egress Rule"
-      GroupId: !Ref EFASubnetSecurityGroup
-      IpProtocol: -1
-      CidrIp: 0.0.0.0/0
-
-  EFASecurityGroupEgress:
-    Type: AWS::EC2::SecurityGroupEgress
-    Properties:
-      Description: "EFA Subnet Security Group Egress Rule"
-      GroupId: !Ref EFASubnetSecurityGroup
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref EFASubnetSecurityGroup
-
   PublicSubnetSecurityGroupPrivateSubnetIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -364,23 +330,6 @@ Resources:
       GroupId: !Ref PublicSubnetSecurityGroup
       IpProtocol: -1
       SourceSecurityGroupId: !Ref PrivateSubnetSecurityGroup
-
-  PublicSubnetSecurityGroupEFAIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      Description: "Public Subnet Security Group Ingress Rule for EFA"
-      GroupId: !Ref PublicSubnetSecurityGroup
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref EFASubnetSecurityGroup
-
-  EFAPlacementGroup:
-    Type: AWS::EC2::PlacementGroup
-    Properties:
-      Strategy: cluster
-      Tags:
-        - Key: Name
-          Value: efa-pg
-
 
 
 Outputs:
@@ -428,11 +377,6 @@ Outputs:
     Description: Public Subnet Security group
     Value: !Ref PrivateSubnetSecurityGroup
 
-  EFASubnetSecurityGroup:
-    Description: EFA Subnet Security group
-    Value: !Ref EFASubnetSecurityGroup
 
-  EFAPlacementGroup:
-    Value: !Ref EFAPlacementGroup
 
 
