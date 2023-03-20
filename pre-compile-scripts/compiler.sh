@@ -292,9 +292,9 @@ fi
 
 get_compiler
 
-export HPC_PREFIX="${PREFIX}/${SARCH}"
+export HPC_PREFIX="${SHARED_DIR}/${SARCH}"
 
-if [ ! -f ${PREFIX}/${SARCH}/.world ] || (! grep -q "^${HPC_COMPILER}" ${PREFIX}/${SARCH}/.world)
+if [ ! -f ${SHARED_DIR}/${SARCH}/.world ] || (! grep -q "^${HPC_COMPILER}" ${SHARED_DIR}/${SARCH}/.world)
 then
     return
 fi
