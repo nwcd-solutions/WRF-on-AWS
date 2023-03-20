@@ -38,9 +38,61 @@ export GEOG_BASE_DIR=${SHARED_DIR}/spooler/domains/geog
 # env.sh 1 0   ## select GNU/GCC compilers with openmpi
 # env.sh ...
 
-export HPC_USE_VENDOR_COMPILER=true
-HPC_COMPILER=gcc
-HPC_MPI=mpich
+export HPC_USE_VENDOR_COMPILER=false
+
+# default settings
+case $1 in
+    0)
+        HPC_USE_VENDOR_COMPILER=true
+        ;;
+    1)
+        HPC_COMPILER=gcc
+        ;;
+    2)
+        HPC_COMPILER=clang
+        ;;
+    3)
+        HPC_COMPILER=icc
+        ;;
+    4)
+        HPC_COMPILER=icx
+        ;;
+    5)
+        HPC_COMPILER=amdclang
+        ;;
+    6)
+        HPC_COMPILER=armgcc
+        ;;
+    7)
+        HPC_COMPILER=armclang
+        ;;
+    8)
+        HPC_COMPILER=nvc
+        ;;
+    *)
+        echo "unknown compiler"
+        ;;
+esac
+
+case $2 in
+    0)
+        HPC_MPI=openmpi
+        ;;
+    1)
+        HPC_MPI=mpich
+        ;;
+    2)
+        HPC_MPI=intelmpi
+        ;;
+    3)
+        HPC_MPI=mvapich
+        ;;
+    4)
+        HPC_MPI=nvidiampi
+        ;;
+    *)
+        echo "unknown MPI"
+       
 #----------------------------------------------------------------------------
 source ${SHARED_DIR}/scripts/compiler.sh
 source ${SHARED_DIR}/scripts/mpi_settings.sh
