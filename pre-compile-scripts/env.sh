@@ -92,7 +92,7 @@ case $2 in
         ;;
     *)
         echo "unknown MPI"
-       
+esac       
 #----------------------------------------------------------------------------
 source ${SHARED_DIR}/scripts/compiler.sh
 source ${SHARED_DIR}/scripts/mpi_settings.sh
