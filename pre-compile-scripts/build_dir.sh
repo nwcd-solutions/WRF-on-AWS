@@ -1,7 +1,7 @@
 #!/bin/bash
 export SHARED_DIR=/fsx
 export WRF_VERSION=3.7.2
-source ${SHARED_DIR}/scripts/env.sh
+source ${SHARED_DIR}/scripts/env.sh 1 1
 export JOB_DIR=$(pwd)
 export WPSWORK=${JOB_DIR}/preproc
 export WRFWORK=${JOB_DIR}/run
