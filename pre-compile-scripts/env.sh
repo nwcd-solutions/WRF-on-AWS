@@ -5,6 +5,7 @@
 
 export SHARED_DIR=/fsx
 export GEOG_BASE_DIR=${SHARED_DIR}/spooler/domains/geog
+export WRF_VERSION=4.4.2
 
 #ENV VARIABLES#
 
