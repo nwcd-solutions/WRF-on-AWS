@@ -5,7 +5,7 @@
 github_repo=$(echo ${cfn_postinstall_args}| cut -d ',' -f 1 )
 setup_command=$(echo ${cfn_postinstall_args}| cut -d ',' -f 2 )
 #shared_folder=$(echo $cfn_ebs_shared_dirs | cut -d ',' -f 1 )
-shared_folder=/fsx
+shared_folder=/shared
 
 echo "ARUMENTS $cfn_postinstall_args"
 echo "REPO: ${github_repo}"
