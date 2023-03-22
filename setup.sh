@@ -2,7 +2,7 @@
 . /etc/parallelcluster/cfnconfig
 
 #shared_folder=$(echo $cfn_ebs_shared_dirs | cut -d ',' -f 1 )
-shared_folder=/fsx
+shared_folder=/shared
 
 function create_env_file {
 echo "Create Env"
