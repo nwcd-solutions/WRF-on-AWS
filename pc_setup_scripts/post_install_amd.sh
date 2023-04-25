@@ -177,9 +177,9 @@ function fini {
   cat > /tmp/jwt.sh <<-EOF
 	#!/bin/bash
 	. /etc/profile.d/slurm.sh
-	cd /fsx/run
-	echo $ftime > /fsx/run/ftime
-	/fsx/run/get_gfs
+	#cd /fsx/run
+	#echo $ftime > /fsx/run/ftime
+	#/fsx/run/get_gfs
 	sudo systemctl restart slurmctld.service
 	sleep 15
 	aws secretsmanager update-secret \
