@@ -55,7 +55,7 @@ EOF
 
 sudo bash -c 'cat /tmp/limits.conf > /etc/security/limits.conf'
 
-systemd_units() {
+function systemd_units {
 
   cat > /etc/systemd/system/slurmdbd.service <<- EOF
 	[Unit]
@@ -97,7 +97,7 @@ EOF
   systemctl enable slurmrestd.service
 }
 
-slurm_db() {
+function slurm_db {
   local region=$1
   yum install -y mysql
   aws secretsmanager get-secret-value \
@@ -164,7 +164,7 @@ EOF
   systemctl start slurmrestd.service
 }
 
-fini() {
+function fini {
   local region=$1
   local sns=$2
   local ftime=$3
@@ -212,7 +212,7 @@ EOF
   systemctl start jwt.service
 }
 
-download_wrf_install_package（） {
+function download_wrf_install_package {
 echo "Download wrf pre-compiled installation package"
 
 chmod 777 ${shared_folder}
