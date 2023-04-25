@@ -99,7 +99,7 @@ EOF
 
 function slurm_db {
   local region=$1
-  yum install -y mysql
+  #yum install -y mysql
   aws secretsmanager get-secret-value \
     --secret-id SlurmDbCreds \
     --query 'SecretString' \
