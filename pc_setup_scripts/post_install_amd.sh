@@ -189,7 +189,7 @@ function fini {
 	export ip=$(curl -q -s http://169.254.169.254/latest/meta-data/local-ipv4)
 	aws sns publish \
 	  --region ${region} \
-	  --subject "Parallel Cluster Post Install - SUCCESS" \
+	  --subject "Parallel Cluster Post Install - finished" \
 	  --message "\$ip" \
 	  --topic-arn $sns
 EOF
