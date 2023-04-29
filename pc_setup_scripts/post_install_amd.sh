@@ -55,7 +55,7 @@ EOF
 
 sudo bash -c 'cat /tmp/limits.conf > /etc/security/limits.conf'
 
-function systemd_units {
+systemd_units() {
 
   cat > /etc/systemd/system/slurmdbd.service <<- EOF
 	[Unit]
@@ -97,9 +97,9 @@ EOF
   systemctl enable slurmrestd.service
 }
 
-function slurm_db {
+slurm_db() {
   local region=$1
-  #yum install -y mysql
+  yum install -y mysql
   aws secretsmanager get-secret-value \
     --secret-id SlurmDbCreds \
     --query 'SecretString' \
@@ -164,7 +164,7 @@ EOF
   systemctl start slurmrestd.service
 }
 
-function fini {
+fini() {
   local region=$1
   local sns=$2
   local ftime=$3
@@ -177,9 +177,9 @@ function fini {
   cat > /tmp/jwt.sh <<-EOF
 	#!/bin/bash
 	. /etc/profile.d/slurm.sh
-	#cd /fsx/run
-	#echo $ftime > /fsx/run/ftime
-	#/fsx/run/get_gfs
+	cd /fsx/run
+	echo $ftime > /fsx/run/ftime
+	/fsx/run/get_gfs
 	sudo systemctl restart slurmctld.service
 	sleep 15
 	aws secretsmanager update-secret \
@@ -189,7 +189,7 @@ function fini {
 	export ip=$(curl -q -s http://169.254.169.254/latest/meta-data/local-ipv4)
 	aws sns publish \
 	  --region ${region} \
-	  --subject "Parallel Cluster Post Install - finished" \
+	  --subject "Parallel Cluster Post Install - FINISHED" \
 	  --message "\$ip" \
 	  --topic-arn $sns
 EOF
@@ -212,14 +212,13 @@ EOF
   systemctl start jwt.service
 }
 
-function download_wrf_install_package {
-echo "Download wrf pre-compiled installation package"
-
-chmod 777 ${shared_folder}
-cd ${shared_folder}
-wget https://aws-hpc-builder.s3.amazonaws.com/project/apps/aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
-tar xpf aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
-chown -R ec2-user:ec2-user ${shared_folder}
+download_wrf_install_package() {
+  echo "Download wrf pre-compiled installation package"
+  chmod 777 ${shared_folder}
+  cd ${shared_folder}
+  wget https://aws-hpc-builder.s3.amazonaws.com/project/apps/aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
+  tar xpf aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
+  chown -R ec2-user:ec2-user ${shared_folder}
 }
 
 echo "NODE TYPE: ${cfn_node_type}"
@@ -227,7 +226,7 @@ echo "NODE TYPE: ${cfn_node_type}"
 case ${cfn_node_type} in
         HeadNode)
                 echo "I am the HeadNode node"
-                download_wrf_install_package
+                #download_wrf_install_package
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
