@@ -245,6 +245,7 @@ build_dir(){
      echo $i
      mkdir -p $jobdir/$i/run
      mkdir -p $jobdir/$i/preproc
+     echo $bucket_name
      aws s3 cp s3://${bucket_name}/input/$i/namelist.wps $jobdir/$i/preproc/
      #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
      #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
