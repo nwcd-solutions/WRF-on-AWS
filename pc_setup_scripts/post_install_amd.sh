@@ -8,7 +8,7 @@ region=$1
 sns=$2
 ftime=$3
 jwt=$4
-
+bucket=$5
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -221,6 +221,59 @@ download_wrf_install_package() {
   chown -R ec2-user:ec2-user ${shared_folder}
 }
 
+build_dir(){
+  ftime=$1
+  bucket=$2
+  y=${ftime:0:4}
+  m=${ftime:5:2}
+  d=${ftime:8:2}
+  h=${ftime:11:2}
+  jobdir=$y-$m-$d-$h
+  job_array=("shandong" "xinjiang" "neimeng" "gansu")
+  start_date=$y-$m-$d 
+  end_date=$(date -d ${start_date}"+2 day") 
+  end_date=$(date -d "${end_date}" +%Y-%m-%d)
+  start_date=${start_date}"_00:00:00" 
+  end_date=${end_date}"_00:00:00" 
+  WRF_VERSION=4.2.2 
+  WPS_VERSION=4.2
+  source /apps/scripts/env.sh 3 2
+  WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
+  WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
+  for i in "${job_array[@]}"
+  do
+     echo $i
+     mkdir -p $jobdir/$i/run
+     mkdir -p $jobdir/$i/preproc
+     aws s3 cp s3://$2/input/$i/namelist.wps $jobdir/$i/preproc/
+     #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     ln -s ${WPS_DIR}/geogrid* $jobdir/$i/preproc/
+     ln -s ${WPS_DIR}/link_grib.csh $jobdir/$i/preproc/
+     ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
+     ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
+     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
+     cp -a ${WRF_DIR}/run $jobdir/$i/run
+     rm $jobdir/$i/run/namelist.input
+     rm $jobdir/$i/run/wrf.exe
+     rm $jobdir/$i/run/real.exe
+     aws s3 cp s3://$2/input/$i/namelist.input $jobdir/$i/run/
+     #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/run/namelist.input
+     #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/run/namelist.input
+     ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
+     ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/$i/run/wrf.exe
+  done
+  mkdir -p $jobdir/downloads
+  cd  $jobdir/downloads
+  gfs="gfs"
+  gfs=$gfs.$y$m$d
+  for i in $(seq -f "%02g"  0 3 96)
+  do
+     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i .
+  done
+  chown -R ec2-user:ec2-user ${jobdir}
+}
+
 echo "NODE TYPE: ${cfn_node_type}"
 
 case ${cfn_node_type} in
@@ -230,6 +283,7 @@ case ${cfn_node_type} in
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
+		build_dir $ftime $bucket
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
