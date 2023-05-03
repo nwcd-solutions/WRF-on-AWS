@@ -280,6 +280,7 @@ case ${cfn_node_type} in
         HeadNode)
                 echo "I am the HeadNode node"
                 #download_wrf_install_package
+		sed -i s"|PREFIX=/fsx|PREFIX=/apps|g" /apps/scripts/env.sh
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
