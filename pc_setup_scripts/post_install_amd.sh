@@ -222,8 +222,8 @@ download_wrf_install_package() {
 }
 
 build_dir(){
-  ftime=$1
-  bucket=$2
+  local ftime=$1
+  local bucket_name=$2
   y=${ftime:0:4}
   m=${ftime:5:2}
   d=${ftime:8:2}
@@ -245,7 +245,7 @@ build_dir(){
      echo $i
      mkdir -p $jobdir/$i/run
      mkdir -p $jobdir/$i/preproc
-     aws s3 cp s3://$2/input/$i/namelist.wps $jobdir/$i/preproc/
+     aws s3 cp s3://${bucket_name}/input/$i/namelist.wps $jobdir/$i/preproc/
      #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
      #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
      ln -s ${WPS_DIR}/geogrid* $jobdir/$i/preproc/
@@ -257,7 +257,7 @@ build_dir(){
      rm $jobdir/$i/run/namelist.input
      rm $jobdir/$i/run/wrf.exe
      rm $jobdir/$i/run/real.exe
-     aws s3 cp s3://$2/input/$i/namelist.input $jobdir/$i/run/
+     aws s3 cp s3://${bucket_name}/input/$i/namelist.input $jobdir/$i/run/
      #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/run/namelist.input
      #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
