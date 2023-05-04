@@ -266,12 +266,11 @@ build_dir(){
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/$i/run/wrf.exe
   done
   mkdir -p $jobdir/downloads
-  cd  $jobdir/downloads
   gfs="gfs"
   gfs=$gfs.$y$m$d
   for i in $(seq -f "%02g"  0 3 96)
   do
-     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i .
+     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i $jobdir/downloads/
   done
   chown -R ec2-user:ec2-user ${jobdir}
 }
