@@ -182,7 +182,7 @@ fini() {
 	#/fsx/run/get_gfs
 	sudo systemctl restart slurmctld.service
 	sleep 15
-	ws secretsmanager update-secret \
+	aws secretsmanager update-secret \
 	  --region ${region} \
 	  --secret-id "$jwt" \
 	  --secret-string \$(/opt/slurm/bin/scontrol token lifespan=7200 | cut -f 2 -d = )
