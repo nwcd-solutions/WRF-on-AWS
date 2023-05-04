@@ -228,7 +228,8 @@ build_dir(){
   m=${ftime:5:2}
   d=${ftime:8:2}
   h=${ftime:11:2}
-  jobdir=$y-$m-$d-$h
+  jobdir=$ftime
+  #jobdir=$y-$m-$d-$h
   job_array=("shandong" "xinjiang" "neimeng" "gansu")
   start_date=$y-$m-$d 
   end_date=$(date -d ${start_date}"+2 day") 
@@ -254,7 +255,7 @@ build_dir(){
      ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
      ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
-     cp -a ${WRF_DIR}/run $jobdir/$i/run
+     cp -a ${WRF_DIR}/run $jobdir/$i
      rm $jobdir/$i/run/namelist.input
      rm $jobdir/$i/run/wrf.exe
      rm $jobdir/$i/run/real.exe
