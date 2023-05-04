@@ -228,7 +228,7 @@ build_dir(){
   m=${ftime:5:2}
   d=${ftime:8:2}
   h=${ftime:11:2}
-  jobdir=$ftime
+  #jobdir=$ftime
   #jobdir=$y-$m-$d-$h
   job_array=("shandong" "xinjiang" "neimeng" "gansu")
   start_date=$y-$m-$d 
@@ -244,35 +244,35 @@ build_dir(){
   for i in "${job_array[@]}"
   do
      echo $i
-     mkdir -p $jobdir/$i/run
-     mkdir -p $jobdir/$i/preproc
+     mkdir -p $i/run
+     mkdir -p $i/preproc
      echo $bucket_name
-     aws s3 cp s3://${bucket_name}/input/$i/namelist.wps $jobdir/$i/preproc/
-     #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
-     #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
-     ln -s ${WPS_DIR}/geogrid* $jobdir/$i/preproc/
-     ln -s ${WPS_DIR}/link_grib.csh $jobdir/$i/preproc/
-     ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
-     ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
-     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
-     cp -a ${WRF_DIR}/run $jobdir/$i
-     rm $jobdir/$i/run/namelist.input
-     rm $jobdir/$i/run/wrf.exe
-     rm $jobdir/$i/run/real.exe
-     aws s3 cp s3://${bucket_name}/input/$i/namelist.input $jobdir/$i/run/
+     aws s3 cp s3://${bucket_name}/input/$i/namelist.wps $i/preproc/
+     #sed -i 's/STARTDATE/'"${start_date}"'/g' $i/preproc/namelist.wps
+     #sed -i 's/ENDDATE/'"${end_date}"'/g' $i/preproc/namelist.wps
+     ln -s ${WPS_DIR}/geogrid* $i/preproc/
+     ln -s ${WPS_DIR}/link_grib.csh $i/preproc/
+     ln -s ${WPS_DIR}/metgrid* $i/preproc/
+     ln -s ${WPS_DIR}/ungrib.exe $i/preproc/ungrib.exe
+     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $i/preproc/Vtable
+     cp -a ${WRF_DIR}/run $i
+     rm $i/run/namelist.input
+     rm $i/run/wrf.exe
+     rm $i/run/real.exe
+     aws s3 cp s3://${bucket_name}/input/$i/namelist.input $i/run/
      #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/run/namelist.input
      #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/run/namelist.input
-     ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
-     ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/$i/run/wrf.exe
+     ln -s ${WRF_DIR}/main/real.exe  $i/run/real.exe
+     ln -s ${WRF_DIR}/main/wrf.exe  $i/run/wrf.exe
   done
-  mkdir -p $jobdir/downloads
+  mkdir downloads
   gfs="gfs"
   gfs=$gfs.$y$m$d
   for i in $(seq -f "%02g"  0 3 96)
   do
-     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i $jobdir/downloads/
+     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i downloads/
   done
-  chown -R ec2-user:ec2-user ${jobdir}
+  chown -R ec2-user:ec2-user .
 }
 
 echo "NODE TYPE: ${cfn_node_type}"
