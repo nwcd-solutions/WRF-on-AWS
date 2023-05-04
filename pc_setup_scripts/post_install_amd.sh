@@ -177,12 +177,12 @@ fini() {
   cat > /tmp/jwt.sh <<-EOF
 	#!/bin/bash
 	. /etc/profile.d/slurm.sh
-	cd /fsx/run
-	echo $ftime > /fsx/run/ftime
-	/fsx/run/get_gfs
+	#cd /fsx/run
+	echo $ftime > /fsx/ftime
+	#/fsx/run/get_gfs
 	sudo systemctl restart slurmctld.service
 	sleep 15
-	aws secretsmanager update-secret \
+	ws secretsmanager update-secret \
 	  --region ${region} \
 	  --secret-id "$jwt" \
 	  --secret-string \$(/opt/slurm/bin/scontrol token lifespan=7200 | cut -f 2 -d = )
