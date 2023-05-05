@@ -9,6 +9,7 @@ sns=$2
 ftime=$3
 jwt=$4
 bucket=$5
+domains_num=$6
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -230,40 +231,43 @@ build_dir(){
   h=${ftime:11:2}
   #jobdir=$ftime
   #jobdir=$y-$m-$d-$h
-  job_array=("shandong" "xinjiang" "neimeng" "gansu")
+  #job_array=("shandong" "xinjiang" "neimeng" "gansu")
   start_date=$y-$m-$d 
   end_date=$(date -d ${start_date}"+2 day") 
   end_date=$(date -d "${end_date}" +%Y-%m-%d)
-  start_date=${start_date}"_00:00:00" 
-  end_date=${end_date}"_00:00:00" 
+  start_date=${start_date}_${h}":00:00" 
+  end_date=${end_date}_${h}":00:00"
   WRF_VERSION=4.2.2 
   WPS_VERSION=4.2
   source /apps/scripts/env.sh 3 2
   WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
   WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
-  for i in "${job_array[@]}"
+  #for i in "${job_array[@]}"
+  for (( i=1; i<=$3; i++ ))
   do
      echo $i
-     mkdir -p $i/run
-     mkdir -p $i/preproc
+     jobdir="domain_"$i
+     echo $jobdir
+     mkdir -p $jobdir/run
+     mkdir -p $jobdir/preproc
      echo $bucket_name
-     aws s3 cp s3://${bucket_name}/input/$i/namelist.wps $i/preproc/
-     #sed -i 's/STARTDATE/'"${start_date}"'/g' $i/preproc/namelist.wps
-     #sed -i 's/ENDDATE/'"${end_date}"'/g' $i/preproc/namelist.wps
-     ln -s ${WPS_DIR}/geogrid* $i/preproc/
-     ln -s ${WPS_DIR}/link_grib.csh $i/preproc/
-     ln -s ${WPS_DIR}/metgrid* $i/preproc/
-     ln -s ${WPS_DIR}/ungrib.exe $i/preproc/ungrib.exe
-     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $i/preproc/Vtable
-     cp -a ${WRF_DIR}/run $i
-     rm $i/run/namelist.input
-     rm $i/run/wrf.exe
-     rm $i/run/real.exe
-     aws s3 cp s3://${bucket_name}/input/$i/namelist.input $i/run/
-     #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/run/namelist.input
-     #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/run/namelist.input
-     ln -s ${WRF_DIR}/main/real.exe  $i/run/real.exe
-     ln -s ${WRF_DIR}/main/wrf.exe  $i/run/wrf.exe
+     aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.wps $jobdir/preproc/
+     sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/preproc/namelist.wps
+     sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/preproc/namelist.wps
+     ln -s ${WPS_DIR}/geogrid* $jobdir/preproc/
+     ln -s ${WPS_DIR}/link_grib.csh $jobdir/preproc/
+     ln -s ${WPS_DIR}/metgrid* $jobdir/preproc/
+     ln -s ${WPS_DIR}/ungrib.exe $jobdir/preproc/ungrib.exe
+     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/preproc/Vtable
+     cp -a ${WRF_DIR}/run $jobdir
+     rm $jobdir/run/namelist.input
+     rm $jobdir/run/wrf.exe
+     rm $jobdir/run/real.exe
+     aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
+     sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$jobdir/run/namelist.input
+     ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
+     ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
   done
   mkdir downloads
   gfs="gfs"
@@ -283,7 +287,7 @@ case ${cfn_node_type} in
                 #download_wrf_install_package
 		sed -i s"|PREFIX=/fsx|PREFIX=/apps|g" /apps/scripts/env.sh
                 cd ${shared_folder}
-		build_dir $ftime $bucket
+		build_dir $ftime $bucket $domains_num
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
