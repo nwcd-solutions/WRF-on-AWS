@@ -228,6 +228,7 @@ build_dir(){
   local bucket_name=$2
   local domains_num=$3
   local forecast_days=$4
+  echo $forecast_days
   y=${ftime:0:4}
   m=${ftime:5:2}
   d=${ftime:8:2}
@@ -244,6 +245,7 @@ build_dir(){
   start_date=${start_date}_${h}":00:00" 
   end_date=${end_date}_${h}":00:00"
   forecast_hours=$(($((forecast_days))*24))
+  echo $forecast_hours
   WRF_VERSION=4.2.2 
   WPS_VERSION=4.2
   source /apps/scripts/env.sh 3 2
