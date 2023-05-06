@@ -281,7 +281,7 @@ build_dir(){
      sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/run/namelist.input
      sed -i 's/END_DAY/'"${e_d}"'/g' $jobdir/run/namelist.input
      sed -i 's/END_HOUR/'"${h}"'/g' $jobdir/run/namelist.input
-     sed -i 's/FORECAST_HOUR/'"${forecast_hour}"'/g' $jobdir/run/namelist.input
+     sed -i 's/FORECAST_HOUR/'"${forecast_hours}"'/g' $jobdir/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
   done
