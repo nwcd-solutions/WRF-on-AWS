@@ -271,15 +271,15 @@ build_dir(){
      rm $jobdir/run/wrf.exe
      rm $jobdir/run/real.exe
      aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
-     sed -i 's/START_YEAR/'"${y}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/START_MONTH/'"${m}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/START_DAY/'"${d}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/START_HOUR/'"${h}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/END_YEAR/'"${e_y}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/END_DAY/'"${e_d}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/END_HOUR/'"${h}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/FORECAST_HOUR/'"${forecast_hour}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/START_YEAR/'"${y}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_MONTH/'"${m}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_DAY/'"${d}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_HOUR/'"${h}"'/g' $jobdir/run/namelist.input
+     sed -i 's/END_YEAR/'"${e_y}"'/g' $jobdir/run/namelist.input
+     sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/run/namelist.input
+     sed -i 's/END_DAY/'"${e_d}"'/g' $jobdir/run/namelist.input
+     sed -i 's/END_HOUR/'"${h}"'/g' $jobdir/run/namelist.input
+     sed -i 's/FORECAST_HOUR/'"${forecast_hour}"'/g' $jobdir/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
   done
