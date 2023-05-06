@@ -225,6 +225,8 @@ download_wrf_install_package() {
 build_dir(){
   local ftime=$1
   local bucket_name=$2
+  local domains_num=$3
+  local forecast_days=$4
   y=${ftime:0:4}
   m=${ftime:5:2}
   d=${ftime:8:2}
@@ -233,13 +235,14 @@ build_dir(){
   #jobdir=$y-$m-$d-$h
   #job_array=("shandong" "xinjiang" "neimeng" "gansu")
   start_date=$y-$m-$d 
-  end_date=$(date -d ${start_date}"+2 day") 
+  end_date=$(date -d ${start_date}"+${forecast_days} day") 
   end_date=$(date -d "${end_date}" +%Y-%m-%d)
   e_y=${end_date:0:4}
   e_m=${end_date:5:2}
   e_d=${end_date:8:2}
   start_date=${start_date}_${h}":00:00" 
   end_date=${end_date}_${h}":00:00"
+  forecast_hours=$(($((forecast_days))*24))
   WRF_VERSION=4.2.2 
   WPS_VERSION=4.2
   source /apps/scripts/env.sh 3 2
@@ -275,6 +278,7 @@ build_dir(){
      sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/$jobdir/run/namelist.input
      sed -i 's/END_DAY/'"${e_d}"'/g' $jobdir/$jobdir/run/namelist.input
      sed -i 's/END_HOUR/'"${h}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/FORECAST_HOUR/'"${forecast_hour}"'/g' $jobdir/$jobdir/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
   done
