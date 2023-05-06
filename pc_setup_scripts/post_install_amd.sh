@@ -187,7 +187,7 @@ fini() {
 	aws secretsmanager update-secret \
 	  --region ${region} \
 	  --secret-id "$jwt" \
-	  --secret-string \$(/opt/slurm/bin/scontrol token lifespan=7200 | cut -f 2 -d = )
+	  --secret-string \$(/opt/slurm/bin/scontrol token lifespan=21600 | cut -f 2 -d = )
 	export ip=$(curl -q -s http://169.254.169.254/latest/meta-data/local-ipv4)
 	aws sns publish \
 	  --region ${region} \
