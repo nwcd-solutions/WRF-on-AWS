@@ -10,6 +10,7 @@ ftime=$3
 jwt=$4
 bucket=$5
 domains_num=$6
+forecast_days=$7
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -300,7 +301,7 @@ case ${cfn_node_type} in
                 #download_wrf_install_package
 		sed -i s"|PREFIX=/fsx|PREFIX=/apps|g" /apps/scripts/env.sh
                 cd ${shared_folder}
-		build_dir $ftime $bucket $domains_num
+		build_dir $ftime $bucket $domains_num $forecast_days
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
