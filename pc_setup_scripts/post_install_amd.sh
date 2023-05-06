@@ -235,6 +235,9 @@ build_dir(){
   start_date=$y-$m-$d 
   end_date=$(date -d ${start_date}"+2 day") 
   end_date=$(date -d "${end_date}" +%Y-%m-%d)
+  e_y=${end_date:0:4}
+  e_m=${end_date:5:2}
+  e_d=${end_date:8:2}
   start_date=${start_date}_${h}":00:00" 
   end_date=${end_date}_${h}":00:00"
   WRF_VERSION=4.2.2 
@@ -264,8 +267,14 @@ build_dir(){
      rm $jobdir/run/wrf.exe
      rm $jobdir/run/real.exe
      aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
-     sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$jobdir/run/namelist.input
-     sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/START_YEAR/'"${y}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/START_MONTH/'"${m}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/START_DAY/'"${d}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/START_HOUR/'"${h}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/END_YEAR/'"${e_y}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/END_DAY/'"${e_d}"'/g' $jobdir/$jobdir/run/namelist.input
+     sed -i 's/END_HOUR/'"${h}"'/g' $jobdir/$jobdir/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
   done
