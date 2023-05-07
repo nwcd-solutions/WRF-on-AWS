@@ -237,6 +237,12 @@ build_dir(){
   #jobdir=$y-$m-$d-$h
   #job_array=("shandong" "xinjiang" "neimeng" "gansu")
   start_date=$y-$m-$d 
+  start_date=$(date -d ${start_date}"+1 day")
+  start_date=$(date -d "${start_date}" +%Y-%m-%d)
+  y=$(start_date:0:4)
+  m=$(start_date:5:2)
+  d=$(start_date:8:2)
+  h='00'
   end_date=$(date -d ${start_date}"+${forecast_days} day") 
   end_date=$(date -d "${end_date}" +%Y-%m-%d)
   e_y=${end_date:0:4}
