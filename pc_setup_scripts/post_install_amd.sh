@@ -272,6 +272,8 @@ build_dir(){
      rm $jobdir/run/namelist.input
      rm $jobdir/run/wrf.exe
      rm $jobdir/run/real.exe
+     rm $jobdir/run/tc.exe
+     rm $jobdir/run/ndown.exe
      aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
      sed -i 's/START_YEAR/'"${y}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_MONTH/'"${m}"'/g' $jobdir/run/namelist.input
@@ -284,6 +286,8 @@ build_dir(){
      sed -i 's/FORECAST_HOUR/'"${forecast_hours}"'/g' $jobdir/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/run/real.exe
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
+     ln -s ${WRF_DIR}/main/tc.exe  $jobdir/run/tc.exe
+     ln -s ${WRF_DIR}/main/ndown.exe  $jobdir/run/ndown.exe  
   done
   mkdir downloads
   gfs="gfs"
