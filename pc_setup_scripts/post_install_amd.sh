@@ -10,7 +10,8 @@ ftime=$3
 jwt=$4
 bucket=$5
 domains_num=$6
-forecast_days=$7
+#forecast_days=$7
+forecast_days='2'
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
