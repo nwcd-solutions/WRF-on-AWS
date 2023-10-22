@@ -1,6 +1,5 @@
 #!/bin/bash -l
 . /etc/parallelcluster/cfnconfig
-set -ex
 #shared_folder=$(echo $cfn_ebs_shared_dirs | cut -d ',' -f 1 )
 shared_folder=/fsx
 #if [ -z "$1" ]; then
