@@ -3,12 +3,12 @@
 set -ex
 #shared_folder=$(echo $cfn_ebs_shared_dirs | cut -d ',' -f 1 )
 shared_folder=/fsx
-if [ -z "$1" ]; then
-  domains_num=2
-else
-  domains_num=$1
-fi
-
+#if [ -z "$1" ]; then
+#  domains_num=2
+#else
+#  domains_num=$1
+#fi
+domains_num=2
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
