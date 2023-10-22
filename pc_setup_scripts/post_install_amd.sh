@@ -81,7 +81,7 @@ build_dir(){
      ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
      ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
-     cp -a ${WRF_DIR}/run $jobdir/$i/run
+     cp -a ${WRF_DIR}/run/. $jobdir/$i/run
      rm $jobdir/$i/run/wrf.exe
      rm $jobdir/$i/run/real.exe
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
