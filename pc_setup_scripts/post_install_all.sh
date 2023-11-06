@@ -71,7 +71,7 @@ build_dir(){
   if [ "$(arch)" == "x86_64" ]
   then
     source /apps/scripts/env.sh 3 2
-  elif [ "$(arch)" == "aarch64"]
+  elif [ "$(arch)" == "aarch64" ]
   then
     source /apps/scripts/env.sh 7 1
   fi
