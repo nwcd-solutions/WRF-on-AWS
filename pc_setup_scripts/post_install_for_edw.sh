@@ -350,9 +350,9 @@ case ${cfn_node_type} in
 		sed -i s"|PREFIX=/fsx|PREFIX=/apps|g" /apps/scripts/env.sh
                 cd ${shared_folder}
 		build_dir $ftime $bucket $domains_num $forecast_days
-                #systemd_units
-                #slurm_db $region
-		slurm_restd
+                systemd_units
+                slurm_db $region
+		#slurm_restd
                 fini $region $ftime $jwt
                 
         ;;
