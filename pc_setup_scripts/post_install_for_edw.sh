@@ -167,6 +167,43 @@ EOF
   systemctl start slurmrestd.service
 }
 
+slurm_restd() {
+
+  cat > /etc/systemd/system/slurmrestd.service <<- EOF
+	[Unit]
+	Description=Slurm REST daemon
+	After=network.target munge.service slurmctld.service
+	ConditionPathExists=/opt/slurm/etc/slurm.conf
+	Documentation=man:slurmrestd(8)
+	[Service]
+	Type=simple
+	User=slumrestd
+	Group=slumrestd
+	Environment="SLURM_JWT=daemon"
+	ExecStart=/opt/slurm/sbin/slurmrestd -a rest_auth/jwt 0.0.0.0:8080
+	ExecReload=/bin/kill -HUP \$MAINPID
+	[Install]
+	WantedBy=multi-user.target
+EOF
+
+  groupadd -r slumrestd
+  useradd -r -c 'SLURM REST API user' -g slumrestd slumrestd
+  systemctl enable slurmdbd.service
+  systemctl enable slurmrestd.service
+
+
+  dd if=/dev/urandom of=/opt/slurm/etc/jwt_hs256.key bs=32 count=1
+  chmod 600 /opt/slurm/etc/jwt_hs256.key
+  chown slurm:slurm /opt/slurm/etc/jwt_hs256.key
+
+  cat >> /opt/slurm/etc/slurm.conf <<- EOF
+	AuthAltTypes=auth/jwt
+	AuthAltParameters=jwt_key=/opt/slurm/etc/jwt_hs256.key
+EOF
+
+  systemctl start slurmrestd.service
+}
+
 fini() {
   local region=$1
   #local sns=$4
@@ -315,6 +352,7 @@ case ${cfn_node_type} in
 		build_dir $ftime $bucket $domains_num $forecast_days
                 #systemd_units
                 #slurm_db $region
+		slurm_restd
                 fini $region $ftime $jwt
                 
         ;;
