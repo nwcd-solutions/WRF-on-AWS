@@ -317,7 +317,7 @@ case ${cfn_node_type} in
                 #download_wrf_install_package
 		sed -i s"|PREFIX=/fsx|PREFIX=/apps|g" /apps/scripts/env.sh
                 cd ${shared_folder}
-		build_dir $ftime $bucket $domains_num $forecast_days
+		build_dir $ftime $bucket $6 $forecast_days
                 systemd_units
                 slurm_db $region
                 fini $region $ftime $jwt
