@@ -265,12 +265,12 @@ build_dir(){
         echo ${row} | base64 --decode | jq -r ${1}
      }     
      echo $(_jq '.name')
-     jobdir="domain_"$(_jq '.name')
+     jobdir=$(_jq '.name')
      echo $jobdir
      mkdir -p $jobdir/run
      mkdir -p $jobdir/preproc
      echo $bucket_name
-     aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.wps $jobdir/preproc/
+     aws s3 cp s3://${bucket_name}/configurations/$jobdir/namelist.wps $jobdir/preproc/
      sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/preproc/namelist.wps
      sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/preproc/namelist.wps
      ln -s ${WPS_DIR}/geogrid* $jobdir/preproc/
@@ -284,7 +284,7 @@ build_dir(){
      rm $jobdir/run/real.exe
      rm $jobdir/run/tc.exe
      rm $jobdir/run/ndown.exe
-     aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
+     aws s3 cp s3://${bucket_name}/configurations//$jobdir/namelist.input $jobdir/run/
      sed -i 's/START_YEAR/'"${s_y}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_MONTH/'"${s_m}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_DAY/'"${s_d}"'/g' $jobdir/run/namelist.input
