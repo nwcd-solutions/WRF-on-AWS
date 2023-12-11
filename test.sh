@@ -284,7 +284,7 @@ build_dir(){
      rm $jobdir/run/real.exe
      rm $jobdir/run/tc.exe
      rm $jobdir/run/ndown.exe
-     aws s3 cp s3://${bucket_name}/configurations//$jobdir/namelist.input $jobdir/run/
+     aws s3 cp s3://${bucket_name}/configurations/$jobdir/namelist.input $jobdir/run/
      sed -i 's/START_YEAR/'"${s_y}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_MONTH/'"${s_m}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_DAY/'"${s_d}"'/g' $jobdir/run/namelist.input
