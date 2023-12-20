@@ -298,13 +298,28 @@ build_dir(){
      ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/run/wrf.exe
      ln -s ${WRF_DIR}/main/tc.exe  $jobdir/run/tc.exe
      ln -s ${WRF_DIR}/main/ndown.exe  $jobdir/run/ndown.exe  
+     aws s3 cp s3://${bucket_name}/public/GFSwrfout_varnames.xlsx $jobdir/post/
+     aws s3 cp s3://${bucket_name}/configurations/$jobdir/locations.xlsx $jobdir/post/
   done
+  mkdir -p /fsx/post-scripts
+  aws s3 cp s3://${bucket_name}/public /fsx/post-scripts/ --recursive
+  echo "post scripts copied to /fsx/post-scripts"
   mkdir downloads
   gfs="gfs"
   gfs=$gfs.$y$m$d
+  retries=2
   for i in $(seq -f "%02g"  0 3 96)
   do
-     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i downloads/
+      for j in $(seq1 $retries); do
+          aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i downloads/
+	  # Check if the download was successful
+        if[ $? -eq 0 ]; then
+            echo"Download successful"
+            break
+        else
+            echo"Download failed, retrying..."
+        fi
+      done
   done
   chown -R ec2-user:ec2-user .
 }
