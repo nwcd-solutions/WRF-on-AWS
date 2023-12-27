@@ -313,10 +313,10 @@ build_dir(){
           aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i downloads/
 	  # Check if the download was successful
         if [ $? -eq 0 ]; then
-            echo"Download successful"
+            echo "Download successful"
             break
         else
-            echo"Download failed, retrying..."
+            echo "Download failed, retrying..."
         fi
       done
   done
