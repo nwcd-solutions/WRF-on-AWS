@@ -18,9 +18,7 @@ source /etc/environment
 
 source /root/config.cfg
 
-if [[ $# -lt 1 ]]; then
-    exit 1
-fi
+
 
 # Install SSM
 machine=$(uname -m)
