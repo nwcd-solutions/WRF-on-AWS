@@ -146,7 +146,7 @@ echo "Launching session ... : dcv create-session --user $SOCA_DCV_OWNER --owner 
 dcv create-session --user $SOCA_DCV_OWNER --owner $SOCA_DCV_OWNER --type virtual --storage-root "$DCV_STORAGE_ROOT" $SOCA_DCV_SESSION_ID
 echo $?
 sleep 5
-
+dbus-launch gsettings set org.gnome.desktop.session idle-delay 0 
 # Final reboot is needed to update GPU drivers if running GPU instance. Reboot will be triggered by ComputeNodePostReboot.sh
 if [[ "${GPU_INSTANCE_FAMILY[@]}" =~ "${INSTANCE_FAMILY}" ]]; then
   echo "@reboot dcv create-session --owner $SOCA_DCV_OWNER --storage-root \"$DCV_STORAGE_ROOT\" $SOCA_DCV_SESSION_ID # Do Not Delete"| crontab - -u $SOCA_DCV_OWNER
