@@ -22,9 +22,6 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 
-# In case AMI already have PBS installed, force it to stop
-service pbs stop || true
-
 # Install SSM
 machine=$(uname -m)
 if ! systemctl status amazon-ssm-agent; then
@@ -64,6 +61,68 @@ if [[ $(rpm -qa kernel | wc -l) -gt 1 ]]; then
     REQUIRE_REBOOT=1
 fi
 
+# Configure Scratch Directory if specified by the user
+mkdir /scratch/
+if [[ $SOCA_SCRATCH_SIZE -ne 0 ]]; then
+    LIST_ALL_DISKS=$(lsblk --list | grep disk | awk '{print $1}')
+    for disk in $LIST_ALL_DISKS;
+    do
+        CHECK_IF_PARTITION_EXIST=$(lsblk -b /dev/$disk | grep part | wc -l)
+        CHECK_PARTITION_SIZE=$(lsblk -lnb /dev/$disk -o SIZE)
+        let SOCA_SCRATCH_SIZE_IN_BYTES=$SOCA_SCRATCH_SIZE*1024*1024*1024
+        if [[ $CHECK_IF_PARTITION_EXIST -eq 0 ]] && [[ $CHECK_PARTITION_SIZE -eq $SOCA_SCRATCH_SIZE_IN_BYTES ]]; then
+            echo "Detected /dev/$disk with no partition as scratch device"
+            mkfs -t ext4 /dev/$disk
+            echo "/dev/$disk /scratch ext4 defaults 0 0" >> /etc/fstab
+        fi
+    done
+else
+    # Use Instance Store if possible.
+    # When instance has more than 1 instance store, raid + mount them as /scratch
+    VOLUME_LIST=()
+    if [[ ! -z $(ls /dev/nvme[0-9]n1) ]]; then
+        echo 'Detected Instance Store: NVME'
+        DEVICES=$(ls /dev/nvme[0-9]n1)
+
+    elif [[ ! -z $(ls /dev/xvdc[a-z]) ]]; then
+        echo 'Detected Instance Store: SSD'
+        DEVICES=$(ls /dev/xvdc[a-z])
+    else
+        echo 'No instance store detected on this machine.'
+    fi
+
+    if [[ ! -z $DEVICES ]]; then
+        echo "Detected Instance Store with NVME:" $DEVICES
+        # Clear Devices which are already mounted (eg: when customer import their own AMI)
+        for device in $DEVICES;
+        do
+            CHECK_IF_PARTITION_EXIST=$(lsblk -b $device | grep part | wc -l)
+            if [[ $CHECK_IF_PARTITION_EXIST -eq 0 ]]; then
+                echo "$device is free and can be used"
+                VOLUME_LIST+=($device)
+            fi
+        done
+
+        VOLUME_COUNT=${#VOLUME_LIST[@]}
+        if [[ $VOLUME_COUNT -eq 1 ]]; then
+            # If only 1 instance store, mfks as ext4
+            echo "Detected  1 NVMe device available, formatting as ext4 .."
+            mkfs -t ext4 $VOLUME_LIST
+            echo "$VOLUME_LIST /scratch ext4 defaults,nofail 0 0" >> /etc/fstab
+        elif [[ $VOLUME_COUNT -gt 1 ]]; then
+            # if more than 1 instance store disks, raid them !
+            echo "Detected more than 1 NVMe device available, creating XFS fs ..."
+            DEVICE_NAME="md0"
+          for dev in ${VOLUME_LIST[@]} ; do dd if=/dev/zero of=$dev bs=1M count=1 ; done
+          echo yes | mdadm --create -f --verbose --level=0 --raid-devices=$VOLUME_COUNT /dev/$DEVICE_NAME ${VOLUME_LIST[@]}
+          mkfs -t ext4 /dev/$DEVICE_NAME
+          mdadm --detail --scan | tee -a /etc/mdadm.conf
+          echo "/dev/$DEVICE_NAME /scratch ext4 defaults,nofail 0 0" >> /etc/fstab
+        else
+            echo "All volumes detected already have a partition or mount point and can't be used as scratch devices"
+        fi
+    fi
+fi
 
 
 # Disable SELINUX & firewalld
