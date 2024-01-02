@@ -34,6 +34,9 @@ if [[ "$SOCA_JOB_TYPE" == "dcv" ]]; then
 fi
 # End DCV Customization
 
+# magic command to disable lock screen
+dbus-launch gsettings set org.gnome.desktop.session idle-delay 0 > /dev/null
+
 # Validate user identities
 if [[ "$SOCA_AUTH_PROVIDER" == "activedirectory" ]]; then
     # Retrieve account with join permission if available, otherwise query SecretManager
