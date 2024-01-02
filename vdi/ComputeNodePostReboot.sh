@@ -20,7 +20,7 @@ export PATH=$PATH:/usr/local/bin
 AWS=$(which aws)
 REQUIRE_REBOOT=0
 echo "SOCA > BEGIN PostReboot setup"
-
+date
 
 # Begin DCV Customization
 if [[ "$SOCA_JOB_TYPE" == "dcv" ]]; then
@@ -174,35 +174,7 @@ if [[ "$SOCA_FSX_LUSTRE_BUCKET" != 'false' ]] || [[ "$SOCA_FSX_LUSTRE_DNS" != 'f
     fi
 fi
 
-# Tag EBS disks manually as CFN ASG does not support it
-IMDS_TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-AWS_AVAIL_ZONE=$(curl -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/availability-zone)
-AWS_INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" --silent http://169.254.169.254/latest/meta-data/instance-id)
-AWS_REGION=$(curl -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-EBS_IDS=$(aws ec2 describe-volumes --filters Name=attachment.instance-id,Values="$AWS_INSTANCE_ID" --region $AWS_REGION --query "Volumes[*].[VolumeId]" --out text | tr "\n" " ")
-LOOP_EBS_TAG=0
-$AWS ec2 create-tags --resources $EBS_IDS --region $AWS_REGION --tags Key=Name,Value="EBS for $SOCA_JOB_ID" Key=soca:JobOwner,Value="$SOCA_JOB_OWNER" Key=soca:JobProject,Value="$SOCA_JOB_PROJECT" Key=Name,Value="soca-job-$SOCA_JOB_ID"  Key=soca:JobId,Value="$SOCA_JOB_ID" Key=soca:JobQueue,Value="$SOCA_JOB_QUEUE" Key=soca:ClusterId,Value="$SOCA_CONFIGURATION"
-while [[ $? -ne 0 ]] && [[ $LOOP_EBS_TAG -lt 5 ]]
-    do
-    SLEEP_TIME=$(( RANDOM % 100 ))
-    echo "ec2 tag failed due to EC2 API error, retrying in  $SLEEP_TIME seconds  and Loop $LOOP_EBS_TAG/5..."
-    sleep $SLEEP_TIME
-    ((LOOP_EBS_TAG++))
-    $AWS ec2 create-tags --resources $EBS_IDS --region $AWS_REGION --tags Key=Name,Value="EBS for $SOCA_JOB_ID" Key=soca:JobOwner,Value="$SOCA_JOB_OWNER" Key=soca:JobProject,Value="$SOCA_JOB_PROJECT" Key=Name,Value="soca-job-$SOCA_JOB_ID"  Key=soca:JobId,Value="$SOCA_JOB_ID" Key=soca:JobQueue,Value="$SOCA_JOB_QUEUE" Key=soca:ClusterId,Value="$SOCA_CONFIGURATION"
-done
 
-# Tag Network Adapter for the Compute Node
-ENI_IDS=$(aws ec2 describe-network-interfaces --filters Name=attachment.instance-id,Values="$AWS_INSTANCE_ID" --region $AWS_REGION --query "NetworkInterfaces[*].[NetworkInterfaceId]" --out text | tr "\n" " ")
-LOOP_ENI_TAG=0
-$AWS ec2 create-tags --resources $ENI_IDS --region $AWS_REGION --tags Key=Name,Value="ENI for $SOCA_JOB_ID" Key=soca:JobOwner,Value="$SOCA_JOB_OWNER" Key=soca:JobProject,Value="$SOCA_JOB_PROJECT" Key=Name,Value="soca-job-$SOCA_JOB_ID"  Key=soca:JobId,Value="$SOCA_JOB_ID" Key=soca:JobQueue,Value="$SOCA_JOB_QUEUE" Key=soca:ClusterId,Value="$SOCA_CONFIGURATION"
-while [[ $? -ne 0 ]] && [[ $LOOP_ENI_TAG -lt 5 ]]
-    do
-    SLEEP_TIME=$(( RANDOM % 100 ))
-    echo "ec2 tag failed due to EC2 API error, retrying in  $SLEEP_TIME seconds ... and Loop $LOOP_ENI_TAG/5"
-    sleep $SLEEP_TIME
-    ((LOOP_ENI_TAG++))
-    $AWS ec2 create-tags --resources $ENI_IDS --region $AWS_REGION --tags Key=Name,Value="ENI for $SOCA_JOB_ID" Key=soca:JobOwner,Value="$SOCA_JOB_OWNER" Key=soca:JobProject,Value="$SOCA_JOB_PROJECT" Key=Name,Value="soca-job-$SOCA_JOB_ID"  Key=soca:JobId,Value="$SOCA_JOB_ID" Key=soca:JobQueue,Value="$SOCA_JOB_QUEUE" Key=soca:ClusterId,Value="$SOCA_CONFIGURATION"
-done
 
 echo "Require Reboot: $REQUIRE_REBOOT"
 if [[ $REQUIRE_REBOOT -eq 1 ]];
@@ -230,7 +202,6 @@ do
     sleep 1
 done
 /bin/bash /root/ComputeNodeUserCustomization.sh >> \$SOCA_HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
-/bin/bash /root/ComputeNodeConfigureMetrics.sh >> \$SOCA_HOST_SYSTEM_LOG/ComputeNodeConfigureMetrics.log 2>&1
 systemctl start pbs" >> /etc/rc.local
     chmod +x /etc/rc.d/rc.local
     systemctl enable rc-local
@@ -257,7 +228,7 @@ else
             echo 0 > /sys/devices/system/cpu/cpu$cpunum/online;
         done
     fi
-
+    date
     # Begin USER Customization
     /bin/bash /root/ComputeNodeUserCustomization.sh >> $SOCA_HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
     # End USER Customization
