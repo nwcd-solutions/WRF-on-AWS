@@ -18,7 +18,7 @@ source /etc/environment
 
 source /root/config.cfg
 
-
+date
 
 # Install SSM
 machine=$(uname -m)
@@ -52,7 +52,7 @@ if [[ ! -f /root/soca_preinstalled_packages.log ]]; then
     fi
     yum install -y $(echo ${OPENLDAP_SERVER_PKGS[*]} ${SSSD_PKGS[*]})
 fi
-
+date
 # Check if the yum updates above installed a new kernel version
 REQUIRE_REBOOT=0
 if [[ $(rpm -qa kernel | wc -l) -gt 1 ]]; then
@@ -191,7 +191,7 @@ echo -e  "
 * hard memlock unlimited
 * soft memlock unlimited
 " >> /etc/security/limits.conf
-
+date
 sudo reboot
 
 # Upon reboot, ComputeNodePostReboot will be executed
