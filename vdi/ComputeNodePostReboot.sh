@@ -57,22 +57,6 @@ if [[ "$SOCA_AUTH_PROVIDER" == "activedirectory" ]]; then
 fi
 # End validate user identities
 
-# Begin EFA Customization
-if [[ "$SOCA_JOB_EFA" == "true" ]]; then
-    echo "Installing EFA"
-    cd /root/
-    curl --silent -O $EFA_URL
-    if [[ $(md5sum $EFA_TGZ | awk '{print $1}') != $EFA_HASH ]];  then
-        echo -e "FATAL ERROR: Checksum for EFA failed. File may be compromised." > /etc/motd
-        exit 1
-    fi
-    tar -xf $EFA_TGZ
-    cd aws-efa-installer
-    /bin/bash efa_installer.sh -y
-fi
-# End EFA customization
-
-
 # Configure FSx if specified by the user.
 # Right before the reboot to minimize the time to wait for FSx to be AVAILABLE
 if [[ "$SOCA_FSX_LUSTRE_BUCKET" != 'false' ]] || [[ "$SOCA_FSX_LUSTRE_DNS" != 'false' ]] ; then
