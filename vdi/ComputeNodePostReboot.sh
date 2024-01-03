@@ -22,7 +22,7 @@ REQUIRE_REBOOT=0
 echo "SOCA > BEGIN PostReboot setup"
 date
 echo "Installing DCV"
-/bin/bash /root/ComputeNodeInstallDCV.sh >> $SOCA_HOST_SYSTEM_LOG/ComputeNodeInstallDCV.log 2>&1
+/bin/bash /root/ComputeNodeInstallDCV.sh >> $HOST_SYSTEM_LOG/ComputeNodeInstallDCV.log 2>&1
 if [[ $? -eq 3 ]];
  then
    REQUIRE_REBOOT=1
@@ -34,7 +34,7 @@ sleep 30
 dbus-launch gsettings set org.gnome.desktop.session idle-delay 0 > /dev/null
 
 # Validate user identities
-if [[ "$SOCA_AUTH_PROVIDER" == "activedirectory" ]]; then
+if [[ "$AUTH_PROVIDER" == "activedirectory" ]]; then
     # Retrieve account with join permission if available, otherwise query SecretManager
     if [[ -f /apps/soca/$SOCA_CONFIGURATION/cluster_node_bootstrap/ad_automation/join_domain_user.cache ]]; then
         DS_DOMAIN_ADMIN_USERNAME=$(cat /apps/soca/$SOCA_CONFIGURATION/cluster_node_bootstrap/ad_automation/join_domain_user.cache)
@@ -59,18 +59,18 @@ fi
 
 # Configure FSx if specified by the user.
 # Right before the reboot to minimize the time to wait for FSx to be AVAILABLE
-if [[ "$SOCA_FSX_LUSTRE_BUCKET" != 'false' ]] || [[ "$SOCA_FSX_LUSTRE_DNS" != 'false' ]] ; then
+if [[ "$FSX_LUSTRE_BUCKET" != 'false' ]] || [[ "$FSX_LUSTRE_DNS" != 'false' ]] ; then
     echo "FSx request detected, installing FSX Lustre client ... "
     FSX_MOUNTPOINT="/fsx"
     mkdir -p $FSX_MOUNTPOINT
 
-    if [[ "$SOCA_FSX_LUSTRE_DNS" == 'false' ]]; then
+    if [[ "$FSX_LUSTRE_DNS" == 'false' ]]; then
         # Retrieve FSX DNS assigned to this job
         FSX_ARN=$($AWS resourcegroupstaggingapi get-resources --tag-filters  "Key=soca:FSx,Values=true" "Key=soca:StackId,Values=$AWS_STACK_ID" --query ResourceTagMappingList[].ResourceARN --output text)
         echo "GET_FSX_ARN: " $FSX_ARN
         FSX_ID=$(echo $FSX_ARN | cut -d/ -f2)
         echo "GET_FSX_ID: " $FSX_ID
-        echo "export SOCA_FSX_LUSTRE_ID="$FSX_ID" >> /etc/environment"
+        echo "export FSX_LUSTRE_ID="$FSX_ID" >> /etc/environment"
         ## UPDATE FSX_DNS VALUE MANUALLY IF YOU ARE USING A PERMANENT FSX
         FSX_DNS=$FSX_ID".fsx."$AWS_DEFAULT_REGION".amazonaws.com"
 
@@ -97,16 +97,16 @@ if [[ "$SOCA_FSX_LUSTRE_BUCKET" != 'false' ]] || [[ "$SOCA_FSX_LUSTRE_DNS" != 'f
         fi
     else
         # Using persistent FSX provided by customer
-        echo "Detected existing FSx provided by customers " $SOCA_FSX_LUSTRE_DNS
-        FSX_ID=$(echo $SOCA_FSX_LUSTRE_DNS | cut -d. -f1)
+        echo "Detected existing FSx provided by customers " $FSX_LUSTRE_DNS
+        FSX_ID=$(echo $FSX_LUSTRE_DNS | cut -d. -f1)
         GET_FSX_MOUNT_NAME=$($AWS fsx describe-file-systems --file-system-ids $FSX_ID  --query FileSystems[].LustreConfiguration.MountName --output text)
-        echo "$SOCA_FSX_LUSTRE_DNS@tcp:/$GET_FSX_MOUNT_NAME $FSX_MOUNTPOINT lustre defaults,noatime,flock,_netdev 0 0" >> /etc/fstab
+        echo "$FSX_LUSTRE_DNS@tcp:/$GET_FSX_MOUNT_NAME $FSX_MOUNTPOINT lustre defaults,noatime,flock,_netdev 0 0" >> /etc/fstab
     fi
     
     # Check if Lustre Client is already installed
     if [[ -z "$(rpm -qa lustre-client)" ]]; then
         # Install FSx for Lustre Client
-        if [[ "$SOCA_BASE_OS" == "amazonlinux2" ]]; then
+        if [[ "$BASE_OS" == "amazonlinux2" ]]; then
             sudo amazon-linux-extras install -y lustre
         else
             kernel=$(uname -r)
@@ -164,8 +164,8 @@ source /etc/environment
 DCVGLADMIN=\$(which dcvgladmin)
 \$DCVGLADMIN enable >> /root/enable_dcvgladmin.log 2>&1
 # Disable HyperThreading
-if [[ \"\$SOCA_INSTANCE_HYPERTHREADING\" == \"false\" ]]; then
-    echo \"Disabling Hyperthreading\" >> \$SOCA_HOST_SYSTEM_LOG/ComputeNodePostReboot.log
+if [[ \"\$INSTANCE_HYPERTHREADING\" == \"false\" ]]; then
+    echo \"Disabling Hyperthreading\" >> \$HOST_SYSTEM_LOG/ComputeNodePostReboot.log
     for cpunum in \$(awk -F'[,-]' '{print \$2}' /sys/devices/system/cpu/cpu*/topology/thread_siblings_list | sort -un);
     do 
         echo 0 > /sys/devices/system/cpu/cpu\$cpunum/online;
@@ -177,11 +177,11 @@ if [[ -n \"\$FSX_MOUNTPOINT\" ]]; then
 fi
 
 chmod 777 /scratch
-while [ ! -d \$SOCA_HOST_SYSTEM_LOG ]
+while [ ! -d \$HOST_SYSTEM_LOG ]
 do
     sleep 1
 done
-/bin/bash /root/ComputeNodeUserCustomization.sh >> \$SOCA_HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
+/bin/bash /root/ComputeNodeUserCustomization.sh >> \$HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
 systemctl start pbs" >> /etc/rc.local
     chmod +x /etc/rc.d/rc.local
     systemctl enable rc-local
@@ -201,8 +201,8 @@ else
     fi
 
     # Disable HyperThreading
-    if [[ $SOCA_INSTANCE_HYPERTHREADING == "false" ]]; then
-        echo "Disabling Hyperthreading"  >> $SOCA_HOST_SYSTEM_LOG/ComputeNodePostReboot.log
+    if [[ $INSTANCE_HYPERTHREADING == "false" ]]; then
+        echo "Disabling Hyperthreading"  >> $HOST_SYSTEM_LOG/ComputeNodePostReboot.log
         for cpunum in $(awk -F'[,-]' '{print $2}' /sys/devices/system/cpu/cpu*/topology/thread_siblings_list | sort -un);
         do
             echo 0 > /sys/devices/system/cpu/cpu$cpunum/online;
@@ -210,7 +210,7 @@ else
     fi
     date
     # Begin USER Customization
-    /bin/bash /root/ComputeNodeUserCustomization.sh >> $SOCA_HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
+    /bin/bash /root/ComputeNodeUserCustomization.sh >> $HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
     # End USER Customization
 
 fi
