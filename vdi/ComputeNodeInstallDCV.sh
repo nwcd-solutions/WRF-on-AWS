@@ -22,18 +22,7 @@ INSTANCE_FAMILY=$(curl -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" --silent http:
 echo "Detected Instance family $INSTANCE_FAMILY"
 GPU_INSTANCE_FAMILY=(g3 g4 g4dn)
 
-# Check if we're using a custom AMI
-if [[ -z "$(rpm -qa gnome-terminal)" ]]; then
-    # Install Gnome or  Mate Desktop
-    if [[ $SOCA_BASE_OS == "rhel7" ]]; then
-      yum groupinstall "Server with GUI" -y
-    elif [[ $SOCA_BASE_OS == "amazonlinux2" ]]; then
-      yum install -y $(echo ${DCV_AMAZONLINUX_PKGS[*]})
-    else
-      # Centos7
-      yum groupinstall "GNOME Desktop" -y
-    fi
-fi
+
 
 # Automatic start Gnome upon reboot
 systemctl set-default graphical.target
