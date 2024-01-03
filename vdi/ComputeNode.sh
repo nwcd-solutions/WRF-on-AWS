@@ -34,25 +34,6 @@ fi
 
 AWS=$(command -v aws)
 
-
-# Check if we're using a customized AMI
-if [[ ! -f /root/soca_preinstalled_packages.log ]]; then
-    # Install System required libraries / EPEL
-    if [[ $SOCA_BASE_OS == "rhel7" ]]; then
-      curl "$EPEL_URL" -o $EPEL_RPM
-      yum -y install $EPEL_RPM
-      yum install -y $(echo ${SYSTEM_PKGS[*]} ${SCHEDULER_PKGS[*]}) --enablerepo rhel-7-server-rhui-optional-rpms
-    elif [[ $SOCA_BASE_OS == "centos7" ]]; then
-      yum -y install epel-release
-      yum install -y $(echo ${SYSTEM_PKGS[*]} ${SCHEDULER_PKGS[*]})
-    else
-      # AL2
-      sudo amazon-linux-extras install -y epel
-      yum install -y $(echo ${SYSTEM_PKGS[*]} ${SCHEDULER_PKGS[*]})
-    fi
-    yum install -y $(echo ${OPENLDAP_SERVER_PKGS[*]} ${SSSD_PKGS[*]})
-fi
-date
 # Check if the yum updates above installed a new kernel version
 REQUIRE_REBOOT=0
 if [[ $(rpm -qa kernel | wc -l) -gt 1 ]]; then
