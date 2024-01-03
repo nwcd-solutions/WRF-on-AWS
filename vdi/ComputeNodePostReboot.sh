@@ -159,8 +159,7 @@ fi
 echo "Require Reboot: $REQUIRE_REBOOT"
 if [[ $REQUIRE_REBOOT -eq 1 ]];
 then
-    echo "systemctl stop pbs
-source /etc/environment
+    echo "source /etc/environment
 DCVGLADMIN=\$(which dcvgladmin)
 \$DCVGLADMIN enable >> /root/enable_dcvgladmin.log 2>&1
 # Disable HyperThreading
@@ -181,8 +180,7 @@ while [ ! -d \$HOST_SYSTEM_LOG ]
 do
     sleep 1
 done
-/bin/bash /root/ComputeNodeUserCustomization.sh >> \$HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1
-systemctl start pbs" >> /etc/rc.local
+/bin/bash /root/ComputeNodeUserCustomization.sh >> \$HOST_SYSTEM_LOG/ComputeNodeUserCustomization.log 2>&1" >> /etc/rc.local
     chmod +x /etc/rc.d/rc.local
     systemctl enable rc-local
     reboot
