@@ -21,18 +21,14 @@ AWS=$(which aws)
 REQUIRE_REBOOT=0
 echo "SOCA > BEGIN PostReboot setup"
 date
-
-# Begin DCV Customization
-if [[ "$SOCA_JOB_TYPE" == "dcv" ]]; then
-    echo "Installing DCV"
-    /bin/bash /root/ComputeNodeInstallDCV.sh >> $SOCA_HOST_SYSTEM_LOG/ComputeNodeInstallDCV.log 2>&1
-    if [[ $? -eq 3 ]];
-     then
-       REQUIRE_REBOOT=1
-    fi
-    sleep 30
+echo "Installing DCV"
+/bin/bash /root/ComputeNodeInstallDCV.sh >> $SOCA_HOST_SYSTEM_LOG/ComputeNodeInstallDCV.log 2>&1
+if [[ $? -eq 3 ]];
+ then
+   REQUIRE_REBOOT=1
 fi
-# End DCV Customization
+sleep 30
+
 
 # magic command to disable lock screen
 dbus-launch gsettings set org.gnome.desktop.session idle-delay 0 > /dev/null
