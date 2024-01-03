@@ -41,35 +41,7 @@ if [[ "${GPU_INSTANCE_FAMILY[@]}" =~ "${INSTANCE_FAMILY}" ]]; then
   $NVIDIAXCONFIG --preserve-busid --enable-all-gpus
 fi
 
-cd ~
-# Download and Install DCV
-machine=$(uname -m)
-echo "Installing DCV"
-if [[ $machine == "x86_64" ]]; then
-    wget $DCV_X86_64_URL
-    if [[ $(md5sum $DCV_X86_64_TGZ | awk '{print $1}') != $DCV_X86_64_HASH ]];  then
-        echo -e "FATAL ERROR: Checksum for DCV failed. File may be compromised." > /etc/motd
-        exit 1
-    fi
-    tar zxvf $DCV_X86_64_TGZ
-    cd nice-dcv-$DCV_X86_64_VERSION
-elif [[ $machine == "aarch64" ]]; then
-    wget $DCV_AARCH64_URL
-    if [[ $(md5sum $DCV_AARCH64_TGZ | awk '{print $1}') != $DCV_AARCH64_HASH ]];  then
-        echo -e "FATAL ERROR: Checksum for DCV failed. File may be compromised." > /etc/motd
-        exit 1
-    fi
-    tar zxvf $DCV_AARCH64_TGZ
-    cd nice-dcv-$DCV_AARCH64_VERSION
-fi
-rpm -ivh nice-xdcv-*.${machine}.rpm --nodeps
-rpm -ivh nice-dcv-server-*.${machine}.rpm --nodeps
-rpm -ivh nice-dcv-web-viewer-*.${machine}.rpm --nodeps
 
-# Enable DCV support for USB remotization
-yum install -y dkms
-DCVUSBDRIVERINSTALLER=$(which dcvusbdriverinstaller)
-$DCVUSBDRIVERINSTALLER --quiet
 
 # Enable GPU support
 if [[ "${GPU_INSTANCE_FAMILY[@]}" =~ "${INSTANCE_FAMILY}" ]]; then
