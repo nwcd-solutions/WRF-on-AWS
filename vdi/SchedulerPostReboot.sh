@@ -6,11 +6,11 @@ source /root/config.cfg
 # First flush the current crontab to prevent this script to run on the next reboot
 crontab -r
 
-useradd -d /data/home/$3 $3
-echo "$4" | passwd $3 --stdin > /dev/null 2>&1
-chown -R $3:$3  /data/home/$3
-echo "$3 ALL=(ALL) ALL" >> /etc/sudoers
-su - $3 -c " ssh-keygen -f ~/.ssh/id_rsa -P '' && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys &&chmod go-w /data/home/$3"
+useradd -d /data/home/$1 $1
+echo "$2" | passwd $1 --stdin > /dev/null 2>&1
+chown -R $1:$1  /data/home/$1
+echo "$1 ALL=(ALL) ALL" >> /etc/sudoers
+su - $1 -c " ssh-keygen -f ~/.ssh/id_rsa -P '' && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys &&chmod go-w /data/home/$1"
 
 # Copy  Aligo scripts file structure
 AWS=$(which aws)
