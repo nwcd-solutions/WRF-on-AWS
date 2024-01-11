@@ -70,7 +70,7 @@ if [[ "$FS_DATA_PROVIDER" == "efs" ]]; then
     echo "$FS_DATA:/ /data/ nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 0 0" >> /etc/fstab
 elif [[ "$FS_DATA_PROVIDER" == "fsx_lustre" ]]; then
     FSX_ID=$(echo $FS_DATA | cut -d. -f1)
-    FSX_DATA_MOUNT_NAME=$($AWS fsx describe-file-systems --file-system-ids $FSX_ID  --query FileSystems[].LustreConfiguration.MountName --output text)
+    FSX_DATA_MOUNT_NAME=$($AWS fsx describe-file-systems --file-system-ids $FSX_ID  --query FileSystems[].LustreConfiguration.MountName --output text --region $REGION)
     echo "$FS_DATA@tcp:/$FSX_DATA_MOUNT_NAME /data lustre defaults,noatime,flock,_netdev 0 0" >> /etc/fstab
 fi
 
@@ -84,7 +84,7 @@ elif [[ "$FS_APPS_PROVIDER" == "efs" ]]; then
     echo "$FS_APPS:/ /apps nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 0 0" >> /etc/fstab
 elif [[ "$FS_APPS_PROVIDER" == "fsx_lustre" ]]; then
     FSX_ID=$(echo $FS_APPS | cut -d. -f1)
-    FSX_APPS_MOUNT_NAME=$($AWS fsx describe-file-systems --file-system-ids $FSX_ID  --query FileSystems[].LustreConfiguration.MountName --output text)
+    FSX_APPS_MOUNT_NAME=$($AWS fsx describe-file-systems --file-system-ids $FSX_ID  --query FileSystems[].LustreConfiguration.MountName --output text --region $REGION)
     echo "$FS_APPS@tcp:/$FSX_APPS_MOUNT_NAME /apps lustre defaults,noatime,flock,_netdev 0 0" >> /etc/fstab
 fi
 
