@@ -2,6 +2,9 @@
 
 source /etc/environment
 source /root/config.cfg
+
+yum install -y $(echo ${OPENLDAP_SERVER_PKGS[*]} ${SSSD_PKGS[*]})
+
 FS_DATA_PROVIDER=$1
 FS_DATA=$2
 FS_APPS_PROVIDER=$3
@@ -10,7 +13,7 @@ SERVER_IP=$(hostname -I)
 SERVER_HOSTNAME=$(hostname)
 SERVER_HOSTNAME_ALT=$(echo $SERVER_HOSTNAME | cut -d. -f1)
 echo $SERVER_IP $SERVER_HOSTNAME $SERVER_HOSTNAME_ALT >> /etc/hosts
-
+LDAP_BASE="dc=soca,dc=local"
 
 
 # Mount EFS
@@ -101,9 +104,176 @@ do
     mount -a
 done
 
-
 # Edit path with new scheduler/python locations
 echo "export PATH=\"/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/pbs/bin:/opt/pbs/sbin:/opt/pbs/bin:/apps/soca/$SOCA_CONFIGURATION/python/latest/bin\"" >> /etc/environment
+
+# Configure Ldap
+systemctl enable slapd
+systemctl start slapd
+
+MASTER_LDAP_PASSWORD=$(slappasswd -g)
+MASTER_LDAP_PASSWORD_ENCRYPTED=$(/sbin/slappasswd -s $MASTER_LDAP_PASSWORD -h "{SSHA}")
+echo -n "admin" > /root/OpenLdapAdminUsername.txt
+echo -n $MASTER_LDAP_PASSWORD > /root/OpenLdapAdminPassword.txt
+chmod 600 /root/OpenLdapAdminPassword.txt
+echo "URI ldap://$SERVER_HOSTNAME" >> /etc/openldap/ldap.conf
+echo "BASE $LDAP_BASE" >> /etc/openldap/ldap.conf
+
+# Generate 10y certificate for ldaps
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+    -subj "/C=US/ST=California/L=Sunnyvale/O=Aligo/CN=$SERVER_HOSTNAME" \
+    -keyout /etc/openldap/certs/soca.key -out /etc/openldap/certs/soca.crt
+
+chown ldap:ldap /etc/openldap/certs/soca.key /etc/openldap/certs/soca.crt
+chmod 600 /etc/openldap/certs/soca.key /etc/openldap/certs/soca.crt
+
+echo -e "
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: $LDAP_BASE
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=admin,$LDAP_BASE
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootPW
+olcRootPW: $MASTER_LDAP_PASSWORD_ENCRYPTED
+" > db.ldif
+
+echo -e "
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/certs/soca.crt
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/certs/soca.key
+" > update_ssl_cert.ldif
+
+echo -e "
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=userPassword by self write by anonymous auth by group.exact="ou=admins,$LDAP_BASE" write by * none
+-
+add: olcAccess
+olcAccess: {1}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" write by dn.base="ou=admins,$LDAP_BASE" write by * read
+" > change_user_password.ldif
+
+echo -e "
+dn: cn=sudo,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: sudo
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.1 NAME 'sudoUser' DESC 'User(s) who may  run sudo' EQUALITY caseExactIA5Match SUBSTR caseExactIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.2 NAME 'sudoHost' DESC 'Host(s) who may run sudo' EQUALITY caseExactIA5Match SUBSTR caseExactIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.3 NAME 'sudoCommand' DESC 'Command(s) to be executed by sudo' EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.4 NAME 'sudoRunAs' DESC 'User(s) impersonated by sudo (deprecated)' EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.5 NAME 'sudoOption' DESC 'Options(s) followed by sudo' EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.6 NAME 'sudoRunAsUser' DESC 'User(s) impersonated by sudo' EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.7 NAME 'sudoRunAsGroup' DESC 'Group(s) impersonated by sudo' EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcObjectClasses: ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL DESC 'Sudoer Entries' MUST ( cn ) MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $ sudoRunAsGroup $ sudoOption $ description ) )
+" > sudoers.ldif
+
+/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f db.ldif
+/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f update_ssl_cert.ldif
+/bin/ldapmodify -Y EXTERNAL -H ldapi:/// -f change_user_password.ldif
+/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f sudoers.ldif
+/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+
+echo -e "
+dn: $LDAP_BASE
+dc: soca
+objectClass: top
+objectClass: domain
+
+dn: cn=admin,$LDAP_BASE
+objectClass: organizationalRole
+cn: admin
+description: LDAP Manager
+
+dn: ou=People,$LDAP_BASE
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,$LDAP_BASE
+objectClass: organizationalUnit
+ou: Group
+
+dn: ou=Sudoers,$LDAP_BASE
+objectClass: organizationalUnit
+
+dn: ou=admins,$LDAP_BASE
+objectClass: organizationalUnit
+ou: Group
+" > base.ldif
+
+/bin/ldapadd -x -W -y /root/OpenLdapAdminPassword.txt -D "cn=admin,$LDAP_BASE" -f base.ldif
+
+authconfig \
+    --enablesssd \
+    --enablesssdauth \
+    --enableldap \
+    --enableldapauth \
+    --ldapserver="ldap://$SERVER_HOSTNAME" \
+    --ldapbasedn="$LDAP_BASE" \
+    --enablelocauthorize \
+    --enablemkhomedir \
+    --enablecachecreds \
+    --updateall
+
+echo "sudoers: files sss" >> /etc/nsswitch.conf
+
+# Configure SSSD
+echo -e "[domain/default]
+enumerate = True
+autofs_provider = ldap
+cache_credentials = True
+ldap_search_base = $LDAP_BASE
+id_provider = ldap
+auth_provider = ldap
+chpass_provider = ldap
+sudo_provider = ldap
+ldap_tls_cacert = /etc/openldap/certs/soca.crt
+ldap_sudo_search_base = ou=Sudoers,$LDAP_BASE
+ldap_uri = ldap://$SERVER_HOSTNAME
+ldap_id_use_start_tls = True
+use_fully_qualified_names = False
+ldap_tls_cacertdir = /etc/openldap/certs/
+
+[sssd]
+services = nss, pam, autofs, sudo
+full_name_format = %2\$s\%1\$s
+domains = default
+
+[nss]
+homedir_substring = /data/home
+
+[pam]
+
+[sudo]
+ldap_sudo_full_refresh_interval=86400
+ldap_sudo_smart_refresh_interval=3600
+
+[autofs]
+
+[ssh]
+
+[pac]
+
+[ifp]
+
+[secrets]" > /etc/sssd/sssd.conf
+chmod 600 /etc/sssd/sssd.conf
+
+systemctl enable sssd
+systemctl restart sssd
+
 
 # Disable SELINUX
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
