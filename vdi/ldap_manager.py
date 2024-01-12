@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # Soca Parameters
     #aligo_configuration = configuration.get_aligo_configuration()
     #ldap_base = aligo_configuration['LdapBase']
-    ldap_base=""
+    ldap_base="dc=soca,dc=local"
     ldap_host=""
     user_home = '/data/home'
     slappasswd = '/sbin/slappasswd'
