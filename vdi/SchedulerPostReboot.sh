@@ -86,9 +86,12 @@ chown -R geoeast:geoeast /apps/GEOEAST
 groupadd -g 699 dba
 adduser -g dba -d /apps/database/postgre -s /bin/csh -u 6001 postgre
 chown -R postgre:dba /apps/database
+
 cd /apps/database/postgre/product/network
 ./rootctl.sh
 su - postgre -c "
 cp /apps/database/postgre/product/network/cshrc.pg /apps/database/postgre/.cshrc ;
 source /apps/database/postgre/.cshrc ;
 /apps/database/postgre/product/network/createdb.sh geodb"
+cd /apps/GEOEAST/ieco1.6/install
+./rootinstall.sh
