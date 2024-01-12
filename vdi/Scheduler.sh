@@ -16,7 +16,7 @@ echo $SERVER_IP $SERVER_HOSTNAME $SERVER_HOSTNAME_ALT >> /etc/hosts
 # Mount EFS
 
 mkdir /apps
-mkdir -p /data/home
+mkdir /data
 
 if [[ "$FS_DATA_PROVIDER" == "fsx_lustre" ]] || [[ "$FS_APPS_PROVIDER" == "fsx_lustre" ]]; then
     if [[ -z "$(rpm -qa lustre-client)" ]]; then
