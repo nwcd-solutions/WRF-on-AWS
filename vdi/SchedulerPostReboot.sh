@@ -7,7 +7,7 @@ source /root/config.cfg
 crontab -r
 DCV_USERNAME=$1
 DCV_SESSION_ID="test"
-
+mkdir -p /data/home
 useradd -d /data/home/$1 $1 -s /bin/csh
 echo "$2" | passwd $1 --stdin > /dev/null 2>&1
 chown -R $1:$1  /data/home/$1
