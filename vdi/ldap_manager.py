@@ -108,8 +108,8 @@ if __name__ == "__main__":
     slappasswd = '/sbin/slappasswd'
     root_dn = 'CN=admin,' + ldap_base
     root_pw = open('/root/OpenLdapAdminPassword.txt', 'r').read()
-    ldap_args = '-ZZ -x -H "ldap://' + aligo_configuration['LdapHost'] + '" -D ' + root_dn + ' -y ' + root_pw
-    con = ldap.initialize('ldap://' + aligo_configuration['LdapHost'])
+    ldap_args = '-ZZ -x -H "ldap://' + ldap_host + '" -D ' + root_dn + ' -y ' + root_pw
+    con = ldap.initialize('ldap://' + ldap_host)
     con.simple_bind_s(root_dn, root_pw)
 
     if ldap_action == 'delete-user':
