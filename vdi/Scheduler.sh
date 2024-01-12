@@ -306,6 +306,9 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 echo "UserKnownHostsFile /dev/null" >> /etc/ssh/ssh_config
 
+# Install Python required libraries
+# Source environment to reload path for Python3
+/apps/python/$PYTHON_VERSION/bin/pip3 install -r /root/requirements.txt
 
 # Configure Chrony
 yum remove -y ntp
