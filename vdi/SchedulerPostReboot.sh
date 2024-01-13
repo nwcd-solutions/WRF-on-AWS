@@ -8,11 +8,30 @@ crontab -r
 DCV_USERNAME=$1
 DCV_SESSION_ID="test"
 mkdir -p /data/home
-useradd -d /data/home/$1 $1 -s /bin/csh
-echo "$2" | passwd $1 --stdin > /dev/null 2>&1
-chown -R $1:$1  /data/home/$1
-echo "$1 ALL=(ALL) ALL" >> /etc/sudoers
-su - $1 -c " ssh-keygen -f ~/.ssh/id_rsa -P '' && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys &&chmod go-w /data/home/$1"
+
+#useradd -d /data/home/$1 $1 -s /bin/csh
+#echo "$2" | passwd $1 --stdin > /dev/null 2>&1
+#chown -R $1:$1  /data/home/$1
+#echo "$1 ALL=(ALL) ALL" >> /etc/sudoers
+#su - $1 -c " ssh-keygen -f ~/.ssh/id_rsa -P '' && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys &&chmod go-w /data/home/$1"
+
+# When using custom AMI, the scheduler is fully operational even before SecretManager is ready. LDAP_Manager has a dependency on SecretManager so we have to wait a little bit (or create the user manually once secretmanager is available)
+MAX_ATTEMPT=5
+CURRENT_ATTEMPT=0
+# Create default LDAP user
+
+until `/apps/python/latest/bin/python3 /root/ldap_manager.py add-user -u $1 -p $2 --admin >> /dev/null 2>&1`
+do
+  echo "Unable to add new LDAP user as command failed (secret manager not ready?) Waiting 3mn ..."
+  if [[ $CURRENT_ATTEMPT -ge $MAX_ATTEMPT ]];
+  then
+    echo "Unable to create LDAP user after 5 attempts, try to run the command manually: /apps/python/latest/bin/python3 /toot/ldap_manager.py add-user -u '$1' -p '$2' --admin"
+    break
+  fi
+  sleep 180
+  ((CURRENT_ATTEMPT=CURRENT_ATTEMPT+1))
+done
+
 
 # Copy  Aligo scripts file structure
 AWS=$(which aws)
