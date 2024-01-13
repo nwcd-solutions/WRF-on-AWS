@@ -132,7 +132,7 @@ def create_user(username, password, sudoers, email=False, uid=False, gid=False):
         ('gidNumber', [str(gid).encode('utf-8')]),
         ('cn', [str(username).encode('utf-8')]),
         ('sn', [str(username).encode('utf-8')]),
-        ('loginShell', ['/bin/bash'.encode('utf-8')]),
+        ('loginShell', ['/bin/csh'.encode('utf-8')]),
         ('homeDirectory', (str(user_home) + '/' + str(username)).encode('utf-8')),
         ('userPassword', [passwd.encode('utf-8')])
     ]
