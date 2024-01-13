@@ -155,10 +155,37 @@ def create_user(username, password, sudoers, email=False, uid=False, gid=False):
 
 
 def add_sudo(username):
+    dn_user = "cn=" + username + ",ou=Sudoers," + ldap_base
+    attrs = [
+        ('objectClass', ['top'.encode('utf-8'),
+                         'sudoRole'.encode('utf-8')]),
+        ('sudoHost', ['ALL'.encode('utf-8')]),
+        ('sudoUser', [str(username).encode('utf-8')]),
+        ('sudoCommand', ['ALL'.encode('utf-8')])
+    ]
+
+    try:
+        con.add_s(dn_user, attrs)
+        return True
+    except Exception as e:
         return e
 
 
 def delete_user(username):
+    try:
+        entries_to_delete = ["uid=" + username + ",ou=People," + ldap_base,
+                             "cn=" + username + ",ou=Group," + ldap_base,
+                             "cn=" + username + ",ou=Sudoers," + ldap_base]
+        today = datetime.datetime.utcnow().strftime('%s')
+        run_command('mv /data/home/' + username + ' /data/home/' + username + '_'+str(today))
+        for entry in entries_to_delete:
+            try:
+                con.delete_s(entry)
+            except ldap.NO_SUCH_OBJECT:
+                pass
+
+        return True
+    except Exception as e:
         return e
 
 
