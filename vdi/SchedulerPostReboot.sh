@@ -25,7 +25,7 @@ do
   echo "Unable to add new LDAP user as command failed (secret manager not ready?) Waiting 3mn ..."
   if [[ $CURRENT_ATTEMPT -ge $MAX_ATTEMPT ]];
   then
-    echo "Unable to create LDAP user after 5 attempts, try to run the command manually: /apps/python/latest/bin/python3 /toot/ldap_manager.py add-user -u '$1' -p '$2' --admin"
+    echo "Unable to create LDAP user after 5 attempts, try to run the command manually: /apps/python/latest/bin/python3 /root/ldap_manager.py add-user -u '$1' -p '$2' --admin"
     break
   fi
   sleep 180
