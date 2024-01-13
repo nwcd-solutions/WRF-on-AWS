@@ -209,7 +209,7 @@ if __name__ == "__main__":
     #aligo_configuration = configuration.get_aligo_configuration()
     #ldap_base = aligo_configuration['LdapBase']
     ldap_base="dc=soca,dc=local"
-    ldap_host=""
+    ldap_host=os.environ['SCHEDULER_IP']
     user_home = '/data/home'
     slappasswd = '/sbin/slappasswd'
     root_dn = 'CN=admin,' + ldap_base
