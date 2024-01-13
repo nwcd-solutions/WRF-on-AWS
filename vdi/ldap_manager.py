@@ -4,9 +4,9 @@ import os
 import shutil
 import sys
 from base64 import b64encode as encode
-
+import boto3
 import ldap
-
+import json
 sys.path.append(os.path.dirname(__file__))
 #import configuration
 from cryptography.hazmat.primitives import serialization as crypto_serialization
@@ -208,8 +208,12 @@ if __name__ == "__main__":
     # Soca Parameters
     #aligo_configuration = configuration.get_aligo_configuration()
     #ldap_base = aligo_configuration['LdapBase']
+    secretsmanager_client = boto3.client('secretsmanager',region_name=os.environ['REGION'])
+    configuration_secret_name = os.environ['CLUSTER_ID']
+    response = secretsmanager_client.get_secret_value(SecretId=configuration_secret_name)
+    ip=json.loads(response['SecretString'], strict=False)["Scheduler_IP"]  
     ldap_base="dc=soca,dc=local"
-    ldap_host=os.environ['SCHEDULER_IP']
+    ldap_host=ip
     user_home = '/data/home'
     slappasswd = '/sbin/slappasswd'
     root_dn = 'CN=admin,' + ldap_base
